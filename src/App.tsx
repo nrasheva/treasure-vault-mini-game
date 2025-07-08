@@ -1,15 +1,13 @@
-import { Application, extend } from "@pixi/react";
-import { Container, Sprite, Text } from "pixi.js";
 import { useEffect, useMemo, useState } from "react";
-import { Handle } from "./Handle";
+import { Sprite } from "pixi.js";
+import { Application, extend } from "@pixi/react";
+import { Background } from "./Background";
 import { generateSecret } from "./utils";
+
 import type { Direction, Pair } from "./types";
 
-// extend tells @pixi/react what Pixi.js components are available
 extend({
-  Container,
   Sprite,
-  Text,
 });
 
 export default function App() {
@@ -30,14 +28,7 @@ export default function App() {
   }, [secret]);
 
   useEffect(() => {
-    const newSecret = generateSecret();
-
-    console.info(
-      "Secret:",
-      newSecret.map((p) => `${p.amount} ${p.direction}`).join(", ")
-    );
-
-    setSecret(newSecret);
+    startGame();
   }, []);
 
   useEffect(() => {
@@ -57,11 +48,20 @@ export default function App() {
     setMoves((prev) => prev + 1);
   };
 
+  const startGame = () => {
+    const newSecret = generateSecret();
+
+    console.info(
+      "Secret:",
+      newSecret.map((p) => `${p.amount} ${p.direction}`).join(", ")
+    );
+
+    setSecret(newSecret);
+  };
+
   return (
-    // We'll wrap our components with an <Application> component to provide
-    // the Pixi.js Application context
     <Application background={"#1099bb"} resizeTo={window}>
-      <Handle onChange={(direction) => handleInput(direction)} />
+      <Background />
     </Application>
   );
 }

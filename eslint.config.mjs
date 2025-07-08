@@ -12,6 +12,7 @@ export default tseslint.config(
       js.configs.recommended,
       ...tseslint.configs.recommended,
       prettier,
+      { trailigComma: "all" },
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -29,5 +30,5 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
-  },
+  }
 );
