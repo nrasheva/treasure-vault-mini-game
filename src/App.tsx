@@ -1,55 +1,67 @@
-import { Application, extend, useApplication, useTick } from "@pixi/react";
-import { Assets, Container, Sprite, Texture } from "pixi.js";
-import { useEffect, useRef, useState } from "react";
+import { Application, extend } from "@pixi/react";
+import { Container, Sprite, Text } from "pixi.js";
+import { useEffect, useMemo, useState } from "react";
+import { Handle } from "./Handle";
+import { generateSecret } from "./utils";
+import type { Direction, Pair } from "./types";
 
 // extend tells @pixi/react what Pixi.js components are available
 extend({
   Container,
   Sprite,
+  Text,
 });
 
-const BunnySprite = () => {
-  const { app } = useApplication();
-
-  // The Pixi.js `Sprite`
-  const spriteRef = useRef<Sprite>(null);
-  const [texture, setTexture] = useState(Texture.EMPTY);
-
-  // Preload the sprite if it hasn't been loaded yet
-  useEffect(() => {
-    if (texture === Texture.EMPTY) {
-      Assets.load("/assets/bunny.png").then((result) => {
-        setTexture(result);
-      });
-    }
-  }, [texture]);
-
-  // Listen for animate update
-  useTick((ticker) => {
-    if (!spriteRef.current) return;
-    // Just for fun, let's rotate mr rabbit a little.
-    // * Delta is 1 if running at 100% performance *
-    // * Creates frame-independent transformation *
-    spriteRef.current.rotation += 0.1 * ticker.deltaTime;
-  });
-
-  return (
-    <pixiSprite
-      ref={spriteRef}
-      texture={texture}
-      anchor={0.5}
-      x={app.screen.width / 2}
-      y={app.screen.height / 2}
-    />
-  );
-};
-
 export default function App() {
+  const [input, setInput] = useState<Direction[]>([]);
+  const [moves, setMoves] = useState(0);
+  const [secret, setSecret] = useState<Pair[]>([]);
+
+  const sequence = useMemo(() => {
+    const result: Direction[] = [];
+
+    for (const pair of secret) {
+      for (let i = 0; i < pair.amount; i++) {
+        result.push(pair.direction);
+      }
+    }
+
+    return result;
+  }, [secret]);
+
+  useEffect(() => {
+    const newSecret = generateSecret();
+
+    console.info(
+      "Secret:",
+      newSecret.map((p) => `${p.amount} ${p.direction}`).join(", ")
+    );
+
+    setSecret(newSecret);
+  }, []);
+
+  useEffect(() => {
+    if (moves >= 1) {
+      const i = moves - 1;
+
+      if (input[i] !== sequence[i]) {
+        console.info("mistake");
+      } else if (input.length === sequence.length) {
+        console.info("unlock");
+      }
+    }
+  }, [input, moves, sequence]);
+
+  const handleInput = (direction: Direction) => {
+    setInput([...input, direction]);
+    setMoves((prev) => prev + 1);
+  };
+
   return (
     // We'll wrap our components with an <Application> component to provide
     // the Pixi.js Application context
     <Application background={"#1099bb"} resizeTo={window}>
-      <BunnySprite />
+      <Handle onChange={(direction) => handleInput(direction)} />
     </Application>
   );
 }
