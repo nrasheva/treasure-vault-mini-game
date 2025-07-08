@@ -78,11 +78,11 @@ export const Handle = (props: HandleProps) => {
   };
 
   const handlePointerDown = (event: FederatedPointerEvent) => {
-    if (isAnimating) return;
-
-    setAccumulatedAngle(0);
-    setDragStartAngle(getAngleFromCenter(event.globalX, event.globalY));
-    setIsDragging(true);
+    if (isAnimating === false) {
+      setAccumulatedAngle(0);
+      setDragStartAngle(getAngleFromCenter(event.globalX, event.globalY));
+      setIsDragging(true);
+    }
   };
 
   const handlePointerMove = (event: FederatedPointerEvent) => {
@@ -154,6 +154,8 @@ export const Handle = (props: HandleProps) => {
       onPointerUpOutside={handlePointerUp}
       ref={spriteRef}
       texture={texture}
+      x={app.screen.width / 2}
+      y={app.screen.height / 2}
     />
   );
 };
