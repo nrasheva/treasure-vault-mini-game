@@ -35,21 +35,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (moves >= 1) {
-      const i = moves - 1;
+    (async () => {
+      if (moves >= 1) {
+        const i = moves - 1;
 
-      if (input[i] !== sequence[i]) {
-        console.info("mistake");
+        if (input[i] !== sequence[i]) {
+          setState("mistake");
 
-        setState("mistake");
-        setTimeout(() => startGame(), 3000);
-      } else if (input.length === sequence.length) {
-        console.info("unlock");
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          startGame();
+        } else if (input.length === sequence.length) {
+          setState("unlocked");
 
-        setState("unlocked");
-        setTimeout(() => startGame(), 5000);
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+          startGame();
+        }
       }
-    }
+    })();
   }, [input, moves, sequence]);
 
   const handleInput = (direction: Direction) => {

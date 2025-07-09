@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Sprite, Texture } from "pixi.js";
+import { Sprite, Text, Texture } from "pixi.js";
 import { useApplication } from "@pixi/react";
 
 export const useResponsiveSprite = (
@@ -39,4 +39,31 @@ export const useResponsiveSprite = (
       app.renderer.off("resize", updateTransform);
     };
   }, [app, mode, multiplier, sprite, texture]);
+};
+
+export const useResponsiveText = (
+  text: React.RefObject<Text | null>,
+  x: number,
+  y: number
+) => {
+  const { app } = useApplication();
+
+  useEffect(() => {
+    const updateTransform = () => {
+      if (text.current) {
+        text.current.position.set(
+          app.screen.width / 2 + x,
+          app.screen.height / 2 + y
+        );
+      }
+    };
+
+    updateTransform();
+
+    app.renderer.on("resize", updateTransform);
+
+    return () => {
+      app.renderer.off("resize", updateTransform);
+    };
+  }, [app, text, x, y]);
 };

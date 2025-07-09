@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, TextStyle } from "pixi.js";
 import { extend } from "@pixi/react";
+import { useResponsiveText } from "./hooks";
 
 extend({ Text });
 
@@ -10,6 +11,8 @@ type TimerProps = {
 
 export const Timer = (props: TimerProps) => {
   const [secondsElapsed, setSecondsElapsed] = useState(0);
+
+  const textRef = useRef<Text | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,8 +36,11 @@ export const Timer = (props: TimerProps) => {
 
   const seconds = (secondsElapsed % 60).toString().padStart(2, "0");
 
+  useResponsiveText(textRef, -295, -45);
+
   return (
     <pixiText
+      ref={textRef}
       style={
         new TextStyle({
           fill: "white",

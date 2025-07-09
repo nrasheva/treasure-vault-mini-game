@@ -150,7 +150,7 @@ export const Handle = (props: HandleProps) => {
     return angle;
   };
 
-  const triggerRotation = (rotationAmount: number) => {
+  const triggerRotation = async (rotationAmount: number) => {
     setAccumulatedAngle(0);
     setIsAnimating(true);
     setTargetRotation((prev) => prev + rotationAmount);
@@ -159,16 +159,16 @@ export const Handle = (props: HandleProps) => {
 
     // Reset drag start angle for continuous rotation
     if (isDragging) {
-      setTimeout(() => {
-        if (isDragging) {
-          setDragStartAngle(
-            getAngleFromCenter(
-              app.renderer.events.pointer?.global.x || 0,
-              app.renderer.events.pointer?.global.y || 0
-            )
-          );
-        }
-      }, 100);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      if (isDragging) {
+        setDragStartAngle(
+          getAngleFromCenter(
+            app.renderer.events.pointer?.global.x || 0,
+            app.renderer.events.pointer?.global.y || 0
+          )
+        );
+      }
     }
   };
 
