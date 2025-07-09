@@ -18,7 +18,7 @@ Make sure you have the following installed:
 ```bash
 ### 1. Clone the Repository
 
-git clone https://github.com/your-username/treasure-vault-mini-game.git
+git clone https://github.com/nrasheva/treasure-vault-mini-game
 cd treasure-vault-mini-game
 
 ### 2. Install Dependencies
