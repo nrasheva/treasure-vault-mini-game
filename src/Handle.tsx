@@ -23,32 +23,43 @@ type HandleProps = {
 export const Handle = (props: HandleProps) => {
   const { app } = useApplication();
 
-  const spriteRef = useRef<Sprite>(null);
+  const handleRef = useRef<Sprite>(null);
+  const shadowRef = useRef<Sprite>(null);
 
   const [accumulatedAngle, setAccumulatedAngle] = useState(0);
   const [currentRotation, setCurrentRotation] = useState(0);
   const [dragStartAngle, setDragStartAngle] = useState(0);
+  const [handleTexture, setHandleTexture] = useState(Texture.EMPTY);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [shadowTexture, setShadowTexture] = useState(Texture.EMPTY);
   const [targetRotation, setTargetRotation] = useState(0);
-  const [texture, setTexture] = useState(Texture.EMPTY);
 
   useEffect(() => {
-    if (texture === Texture.EMPTY) {
+    if (handleTexture === Texture.EMPTY) {
       Assets.load("/assets/handle.png").then((result) => {
-        setTexture(result);
+        setHandleTexture(result);
       });
     }
-  }, [texture]);
+  }, [handleTexture]);
+
+  useEffect(() => {
+    if (shadowTexture === Texture.EMPTY) {
+      Assets.load("/assets/handleShadow.png").then((result) => {
+        setShadowTexture(result);
+      });
+    }
+  }, [shadowTexture]);
 
   useTick((ticker) => {
-    if (spriteRef.current) {
+    if (handleRef.current && shadowRef.current) {
       if (isAnimating) {
         const rotationDiff = targetRotation - currentRotation;
 
         if (Math.abs(rotationDiff) < 0.01) {
           // Animation complete
-          spriteRef.current.rotation = targetRotation;
+          handleRef.current.rotation = targetRotation;
+          shadowRef.current.rotation = targetRotation;
 
           setIsAnimating(false);
           setCurrentRotation(targetRotation);
@@ -56,20 +67,22 @@ export const Handle = (props: HandleProps) => {
           const newRotation =
             currentRotation + rotationDiff * 0.15 * ticker.deltaTime;
 
-          spriteRef.current.rotation = newRotation;
+          handleRef.current.rotation = newRotation;
+          shadowRef.current.rotation = newRotation;
 
           setCurrentRotation(newRotation);
         }
       } else {
-        spriteRef.current.rotation = currentRotation;
+        handleRef.current.rotation = currentRotation;
+        shadowRef.current.rotation = currentRotation;
       }
     }
   });
 
   const getAngleFromCenter = (x: number, y: number) => {
-    if (spriteRef.current) {
-      const centerX = spriteRef.current.x;
-      const centerY = spriteRef.current.y;
+    if (handleRef.current) {
+      const centerX = handleRef.current.x;
+      const centerY = handleRef.current.y;
 
       return Math.atan2(y - centerY, x - centerX);
     } else {
@@ -141,21 +154,36 @@ export const Handle = (props: HandleProps) => {
     }
   };
 
-  useResponsiveSprite("fixed", 0.225, spriteRef, texture, 0, -10);
+  useResponsiveSprite("fixed", 0.225, handleRef, handleTexture, 0, -10);
+  useResponsiveSprite("fixed", 0.225, shadowRef, shadowTexture, 10, -10);
+
+  const centerX = app.screen.width / 2;
+  const centerY = app.screen.height / 2;
 
   return (
-    <pixiSprite
-      anchor={0.5}
-      cursor="grab"
-      interactive={true}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerUpOutside={handlePointerUp}
-      ref={spriteRef}
-      texture={texture}
-      x={app.screen.width / 2}
-      y={app.screen.height / 2}
-    />
+    <>
+      <pixiSprite
+        alpha={0.5}
+        anchor={0.5}
+        interactive={false}
+        ref={shadowRef}
+        texture={shadowTexture}
+        x={centerX}
+        y={centerY}
+      />
+      <pixiSprite
+        anchor={0.5}
+        cursor="grab"
+        interactive={true}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerUpOutside={handlePointerUp}
+        ref={handleRef}
+        texture={handleTexture}
+        x={centerX}
+        y={centerY}
+      />
+    </>
   );
 };

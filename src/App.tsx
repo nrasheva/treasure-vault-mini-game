@@ -14,6 +14,7 @@ export default function App() {
   const [input, setInput] = useState<Direction[]>([]);
   const [moves, setMoves] = useState(0);
   const [secret, setSecret] = useState<Pair[]>([]);
+  const [unlocked, setUnlocked] = useState(false);
 
   const sequence = useMemo(() => {
     const result: Direction[] = [];
@@ -37,8 +38,11 @@ export default function App() {
 
       if (input[i] !== sequence[i]) {
         console.info("mistake");
+        startGame();
       } else if (input.length === sequence.length) {
         console.info("unlock");
+        setUnlocked(true);
+        // setTimeout(() => startGame(), 5000);
       }
     }
   }, [input, moves, sequence]);
@@ -59,13 +63,14 @@ export default function App() {
     setInput([]);
     setMoves(0);
     setSecret(newSecret);
+    setUnlocked(false);
   };
 
   return (
     <Application background={"#1099bb"} resizeTo={window}>
       <Background />
-      <Door />
-      <Handle onChange={(direction) => handleInput(direction)} />
+      <Door open={unlocked} />
+      {!unlocked && <Handle onChange={handleInput} />}
     </Application>
   );
 }

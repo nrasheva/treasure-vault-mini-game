@@ -2,20 +2,35 @@ import { useEffect, useRef, useState } from "react";
 import { Assets, Sprite, Texture } from "pixi.js";
 import { useResponsiveSprite } from "./hooks";
 
-export const Door = () => {
-  const spriteRef = useRef<Sprite | null>(null);
+type DoorProps = {
+  open: boolean;
+};
 
-  const [texture, setTexture] = useState(Texture.EMPTY);
+export const Door = (props: DoorProps) => {
+  const doorRef = useRef<Sprite | null>(null);
+
+  const [doorTexture, setDoorTexture] = useState(Texture.EMPTY);
 
   useEffect(() => {
-    if (texture === Texture.EMPTY) {
-      Assets.load("/assets/door.png").then((result) => {
-        setTexture(result);
-      });
-    }
-  }, [texture]);
+    Assets.load(props.open ? "/assets/doorOpen.png" : "/assets/door.png").then(
+      (result) => {
+        setDoorTexture(result);
+      }
+    );
+  }, [doorTexture, props.open]);
 
-  useResponsiveSprite("fixed", 0.225, spriteRef, texture, 20, -10);
+  useResponsiveSprite(
+    "fixed",
+    0.225,
+    doorRef,
+    doorTexture,
+    props.open ? 300 : 20,
+    -10
+  );
 
-  return <pixiSprite anchor={0.5} ref={spriteRef} texture={texture} />;
+  return (
+    <>
+      <pixiSprite anchor={0.5} ref={doorRef} texture={doorTexture} />
+    </>
+  );
 };
