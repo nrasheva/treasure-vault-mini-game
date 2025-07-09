@@ -5,6 +5,7 @@ import { Background } from "./Background";
 import { Blink } from "./Blink";
 import { Door } from "./Door";
 import { Handle } from "./Handle";
+import { Timer } from "./Timer";
 import { generateSecret } from "./utils";
 
 import type { Direction, Pair } from "./types";
@@ -76,6 +77,7 @@ export default function App() {
       <Blink state={state} />
       <Door state={state} />
       <Handle key={state} onChange={handleInput} state={state} />
+      <Timer state={state} />
     </Application>
   );
 }
