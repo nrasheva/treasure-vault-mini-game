@@ -7,6 +7,7 @@ import {
   FederatedPointerEvent,
 } from "pixi.js";
 import { extend, useApplication, useTick } from "@pixi/react";
+import gsap from "gsap";
 import { useResponsiveSprite } from "./hooks";
 
 import type { Direction } from "./types";
@@ -18,6 +19,7 @@ const SNAP_ROTATION = Math.PI / 3;
 
 type HandleProps = {
   onChange: (direction: Direction) => void;
+  state: string;
 };
 
 export const Handle = (props: HandleProps) => {
@@ -51,15 +53,31 @@ export const Handle = (props: HandleProps) => {
     }
   }, [shadowTexture]);
 
+  useEffect(() => {
+    if (handleRef.current && props.state === "mistake") {
+      gsap.to(handleRef.current, {
+        duration: 3,
+        ease: "power2.out",
+        rotation: Math.PI * 2 * 5,
+      });
+    }
+
+    return () => {
+      if (handleRef.current) {
+        gsap.killTweensOf(handleRef.current);
+      }
+    };
+  }, [props.state]);
+
   useTick((ticker) => {
-    if (handleRef.current && shadowRef.current) {
+    if (handleRef.current && props.state !== "mistake") {
       if (isAnimating) {
         const rotationDiff = targetRotation - currentRotation;
 
         if (Math.abs(rotationDiff) < 0.01) {
           // Animation complete
           handleRef.current.rotation = targetRotation;
-          shadowRef.current.rotation = targetRotation;
+          // shadowRef.current.rotation = targetRotation;
 
           setIsAnimating(false);
           setCurrentRotation(targetRotation);
@@ -68,13 +86,13 @@ export const Handle = (props: HandleProps) => {
             currentRotation + rotationDiff * 0.15 * ticker.deltaTime;
 
           handleRef.current.rotation = newRotation;
-          shadowRef.current.rotation = newRotation;
+          // shadowRef.current.rotation = newRotation;
 
           setCurrentRotation(newRotation);
         }
       } else {
         handleRef.current.rotation = currentRotation;
-        shadowRef.current.rotation = currentRotation;
+        // shadowRef.current.rotation = currentRotation;
       }
     }
   });
@@ -162,7 +180,7 @@ export const Handle = (props: HandleProps) => {
 
   return (
     <>
-      <pixiSprite
+      {/* <pixiSprite
         alpha={0.5}
         anchor={0.5}
         interactive={false}
@@ -170,20 +188,22 @@ export const Handle = (props: HandleProps) => {
         texture={shadowTexture}
         x={centerX}
         y={centerY}
-      />
-      <pixiSprite
-        anchor={0.5}
-        cursor="grab"
-        interactive={true}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerUpOutside={handlePointerUp}
-        ref={handleRef}
-        texture={handleTexture}
-        x={centerX}
-        y={centerY}
-      />
+      /> */}
+      {props.state !== "unlocked" && (
+        <pixiSprite
+          anchor={0.5}
+          cursor="grab"
+          interactive={true}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerUpOutside={handlePointerUp}
+          ref={handleRef}
+          texture={handleTexture}
+          x={centerX}
+          y={centerY}
+        />
+      )}
     </>
   );
 };

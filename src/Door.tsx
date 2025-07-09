@@ -3,7 +3,7 @@ import { Assets, Sprite, Texture } from "pixi.js";
 import { useResponsiveSprite } from "./hooks";
 
 type DoorProps = {
-  open: boolean;
+  state: string;
 };
 
 export const Door = (props: DoorProps) => {
@@ -12,19 +12,19 @@ export const Door = (props: DoorProps) => {
   const [doorTexture, setDoorTexture] = useState(Texture.EMPTY);
 
   useEffect(() => {
-    Assets.load(props.open ? "/assets/doorOpen.png" : "/assets/door.png").then(
-      (result) => {
-        setDoorTexture(result);
-      }
-    );
-  }, [doorTexture, props.open]);
+    Assets.load(
+      props.state === "unlocked" ? "/assets/doorOpen.png" : "/assets/door.png"
+    ).then((result) => {
+      setDoorTexture(result);
+    });
+  }, [doorTexture, props.state]);
 
   useResponsiveSprite(
     "fixed",
     0.225,
     doorRef,
     doorTexture,
-    props.open ? 300 : 20,
+    props.state === "unlocked" ? 300 : 20,
     -10
   );
 
