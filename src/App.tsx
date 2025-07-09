@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Sprite } from "pixi.js";
 import { Application, extend } from "@pixi/react";
 import { Background } from "./Background";
+import { Blink } from "./Blink";
 import { Door } from "./Door";
 import { Handle } from "./Handle";
 import { generateSecret } from "./utils";
@@ -72,6 +73,7 @@ export default function App() {
   return (
     <Application background={"#1099bb"} resizeTo={window}>
       <Background />
+      <Blink state={state} />
       <Door state={state} />
       <Handle key={state} onChange={handleInput} state={state} />
     </Application>
