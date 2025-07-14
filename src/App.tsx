@@ -76,7 +76,7 @@ export default function App() {
   return (
     <Application background={"#1099bb"} resizeTo={window}>
       <Background />
-      <Blink state={state} />
+      {state === "unlocked" &&<Blink state={state} />}
       <Door state={state} />
       <Handle key={state} onChange={handleInput} state={state} />
       <Timer state={state} />
