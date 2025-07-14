@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Sprite } from "pixi.js";
 import { Application, extend } from "@pixi/react";
 import { Background } from "./Background";
-import { Blink } from "./Blink";
 import { Door } from "./Door";
 import { Handle } from "./Handle";
 import { Timer } from "./Timer";
 import { generateSecret } from "./utils";
 
 import type { Direction, Pair } from "./types";
+import { Blinks } from "./Blinks";
 
 extend({ Sprite });
 
@@ -45,6 +45,7 @@ export default function App() {
           await new Promise((resolve) => setTimeout(resolve, 3000));
           startGame();
         } else if (input.length === sequence.length) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
           setState("unlocked");
 
           await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -74,9 +75,9 @@ export default function App() {
   };
 
   return (
-    <Application background={"#1099bb"} resizeTo={window}>
+    <Application background={"transparent"} resizeTo={window}>
       <Background />
-      {state === "unlocked" &&<Blink state={state} />}
+      {state === "unlocked" && <Blinks state={state} />}
       <Door state={state} />
       <Handle key={state} onChange={handleInput} state={state} />
       <Timer state={state} />
