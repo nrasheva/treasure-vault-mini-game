@@ -15,7 +15,7 @@ export const Background = () => {
     }
   }, [texture]);
 
-  useResponsiveSprite("cover", 1, spriteRef, texture, 0, 0);
+  useResponsiveSprite("fixed", 1, spriteRef, texture, 0, 0);
 
   return <pixiSprite anchor={0.5} ref={spriteRef} texture={texture} />;
 };

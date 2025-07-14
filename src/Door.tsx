@@ -17,14 +17,14 @@ export const Door = (props: DoorProps) => {
     ).then((result) => {
       setDoorTexture(result);
     });
-  }, [doorTexture, props.state]);
+  }, [props.state]);
 
   useResponsiveSprite(
     "fixed",
-    0.225,
+    props.state === "unlocked" ? 0.225 : 0.35,
     doorRef,
     doorTexture,
-    props.state === "unlocked" ? 300 : 20,
+    props.state === "unlocked" ? 280 : 10,
     -10
   );
 
