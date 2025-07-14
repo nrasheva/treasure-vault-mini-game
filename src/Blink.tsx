@@ -1,22 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { useResponsiveSprite } from "./hooks";
 import { Assets, Sprite, Texture } from "pixi.js";
 import gsap from "gsap";
-import { useResponsiveSprite } from "./hooks";
 
 type BlinkProps = {
   state: string;
+  x: number;
+  y: number;
+  scale?: number;
 };
 
-export const Blink = (props: BlinkProps) => {
+export const Blink = ({ state, x, y, scale = 0.1 }: BlinkProps) => {
   const blinkRef = useRef<Sprite | null>(null);
-
   const [blinkTexture, setBlinkTexture] = useState(Texture.EMPTY);
 
   useEffect(() => {
     Assets.load("/assets/blink.png").then((result) => {
       setBlinkTexture(result);
     });
-  }, [blinkTexture]);
+  }, []);
 
   useEffect(() => {
     if (blinkRef.current) {
@@ -24,18 +26,21 @@ export const Blink = (props: BlinkProps) => {
         duration: 0.5,
         ease: "sine.inOut",
         repeat: -1,
-        x: 1.2,
-        y: 1.2,
+        x: "+=0.2",
+        y: "+=0.2",
         yoyo: true,
+        delay: Math.random() * 0.5,
       });
     }
-  }, [props.state]);
+  }, [state]);
 
-  useResponsiveSprite("fixed", 0.225, blinkRef, blinkTexture, -20, 40);
+  useResponsiveSprite("fixed", scale, blinkRef, blinkTexture, x, y);
 
   return (
     <>
-      <pixiSprite anchor={0.5} ref={blinkRef} texture={blinkTexture} />
+      {blinkTexture.width > 0 && (
+        <pixiSprite anchor={0.5} ref={blinkRef} texture={blinkTexture} />
+      )}
     </>
   );
 };
