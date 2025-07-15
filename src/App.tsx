@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Sprite } from "pixi.js";
+import { Assets, Sprite } from "pixi.js";
 import { Application, extend } from "@pixi/react";
 import { Background } from "./Background";
 import { Door } from "./Door";
@@ -9,6 +9,7 @@ import { generateSecret } from "./utils";
 
 import type { Direction, Pair } from "./types";
 import { Blinks } from "./Blinks";
+import { LoadingScreen } from "./Loader";
 
 extend({ Sprite });
 
@@ -17,6 +18,7 @@ export default function App() {
   const [moves, setMoves] = useState(0);
   const [secret, setSecret] = useState<Pair[]>([]);
   const [state, setState] = useState("locked");
+  const [loaded, setLoaded] = useState(false);
 
   const sequence = useMemo(() => {
     const result: Direction[] = [];
@@ -31,10 +33,27 @@ export default function App() {
   }, [secret]);
 
   useEffect(() => {
-    startGame();
+    const loadAssets = async () => {
+      await Assets.load([
+        "/assets/bg.png",
+        "/assets/door.png",
+        "/assets/handle.png",
+        "/assets/doorOpen.png",
+      ]);
+      setLoaded(true);
+      startGame();
+    };
+
+    loadAssets();
   }, []);
 
+  // useEffect(() => {
+  //   startGame();
+  // }, []);
+
   useEffect(() => {
+    if (!loaded) return;
+
     (async () => {
       if (moves >= 1) {
         const i = moves - 1;
@@ -53,7 +72,7 @@ export default function App() {
         }
       }
     })();
-  }, [input, moves, sequence]);
+  }, [input, moves, sequence, loaded]);
 
   const handleInput = (direction: Direction) => {
     setInput([...input, direction]);
@@ -75,12 +94,18 @@ export default function App() {
   };
 
   return (
-    <Application background={"transparent"} resizeTo={window}>
-      <Background />
-      {state === "unlocked" && <Blinks state={state} />}
-      <Door state={state} />
-      <Handle key={state} onChange={handleInput} state={state} />
-      <Timer state={state} />
+    <Application backgroundAlpha={0} resizeTo={window}>
+      {!loaded ? (
+        <LoadingScreen />
+      ) : (
+        <>
+          <Background />
+          <Blinks state={state} />
+          <Door state={state} />
+          <Handle key={state} onChange={handleInput} state={state} />
+          <Timer state={state} />
+        </>
+      )}
     </Application>
   );
 }
