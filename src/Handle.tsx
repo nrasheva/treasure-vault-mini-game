@@ -6,11 +6,13 @@ import {
   Texture,
   FederatedPointerEvent,
 } from "pixi.js";
-import { extend, useApplication, useTick } from "@pixi/react";
+import { extend, useApplication } from "@pixi/react";
 import gsap from "gsap";
 import { useResponsiveSprite } from "./hooks";
 
 import type { Direction } from "./types";
+import { UIConfig } from "./uiConfig";
+import { wait } from "./utils";
 
 extend({ Container, Sprite });
 
@@ -26,7 +28,6 @@ export const Handle = (props: HandleProps) => {
   const { app } = useApplication();
 
   const handleRef = useRef<Sprite>(null);
-  const shadowRef = useRef<Sprite>(null);
 
   const [accumulatedAngle, setAccumulatedAngle] = useState(0);
   const [currentRotation, setCurrentRotation] = useState(0);
@@ -34,8 +35,6 @@ export const Handle = (props: HandleProps) => {
   const [handleTexture, setHandleTexture] = useState(Texture.EMPTY);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [shadowTexture, setShadowTexture] = useState(Texture.EMPTY);
-  const [targetRotation, setTargetRotation] = useState(0);
 
   useEffect(() => {
     if (handleTexture === Texture.EMPTY) {
@@ -44,14 +43,6 @@ export const Handle = (props: HandleProps) => {
       });
     }
   }, [handleTexture]);
-
-  useEffect(() => {
-    if (shadowTexture === Texture.EMPTY) {
-      Assets.load("/assets/handleShadow.png").then((result) => {
-        setShadowTexture(result);
-      });
-    }
-  }, [shadowTexture]);
 
   useEffect(() => {
     if (handleRef.current && props.state === "mistake") {
@@ -69,33 +60,46 @@ export const Handle = (props: HandleProps) => {
     };
   }, [props.state]);
 
-  useTick((ticker) => {
-    if (handleRef.current && props.state !== "mistake") {
-      if (isAnimating) {
-        const rotationDiff = targetRotation - currentRotation;
+  const triggerRotation = async (rotationAmount: number) => {
+    if (!handleRef.current) return;
 
-        if (Math.abs(rotationDiff) < 0.01) {
-          // Animation complete
-          handleRef.current.rotation = targetRotation;
-          // shadowRef.current.rotation = targetRotation;
+    setAccumulatedAngle(0);
+    setIsAnimating(true);
 
-          setIsAnimating(false);
-          setCurrentRotation(targetRotation);
-        } else {
-          const newRotation =
-            currentRotation + rotationDiff * 0.15 * ticker.deltaTime;
+    const newTargetRotation = currentRotation + rotationAmount;
 
-          handleRef.current.rotation = newRotation;
-          // shadowRef.current.rotation = newRotation;
-
-          setCurrentRotation(newRotation);
+    // Animate with GSAP
+    gsap.to(handleRef.current, {
+      duration: 0.5,
+      rotation: newTargetRotation,
+      ease: "power2.out",
+      onUpdate: () => {
+        if (handleRef.current) {
+          setCurrentRotation(handleRef.current.rotation);
         }
-      } else {
-        handleRef.current.rotation = currentRotation;
-        // shadowRef.current.rotation = currentRotation;
+      },
+      onComplete: () => {
+        setCurrentRotation(newTargetRotation);
+        setIsAnimating(false);
+      },
+    });
+
+    props.onChange(rotationAmount > 0 ? "clockwise" : "counterclockwise");
+
+    // Reset drag start angle for continuous rotation
+    if (isDragging) {
+      await wait(100);
+
+      if (isDragging) {
+        setDragStartAngle(
+          getAngleFromCenter(
+            app.renderer.events.pointer?.global.x || 0,
+            app.renderer.events.pointer?.global.y || 0
+          )
+        );
       }
     }
-  });
+  };
 
   const getAngleFromCenter = (x: number, y: number) => {
     if (handleRef.current) {
@@ -150,45 +154,20 @@ export const Handle = (props: HandleProps) => {
     return angle;
   };
 
-  const triggerRotation = async (rotationAmount: number) => {
-    setAccumulatedAngle(0);
-    setIsAnimating(true);
-    setTargetRotation((prev) => prev + rotationAmount);
-
-    props.onChange(rotationAmount > 0 ? "clockwise" : "counterclockwise");
-
-    // Reset drag start angle for continuous rotation
-    if (isDragging) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      if (isDragging) {
-        setDragStartAngle(
-          getAngleFromCenter(
-            app.renderer.events.pointer?.global.x || 0,
-            app.renderer.events.pointer?.global.y || 0
-          )
-        );
-      }
-    }
-  };
-
-  useResponsiveSprite("fixed", 0.225, handleRef, handleTexture, 0, -10);
-  useResponsiveSprite("fixed", 0.225, shadowRef, shadowTexture, 10, -10);
+  useResponsiveSprite(
+    "fixed",
+    UIConfig.handle.scale,
+    handleRef,
+    handleTexture,
+    UIConfig.handle.offsetX,
+    UIConfig.handle.offsetY
+  );
 
   const centerX = app.screen.width / 2;
   const centerY = app.screen.height / 2;
 
   return (
     <>
-      {/* <pixiSprite
-        alpha={0.5}
-        anchor={0.5}
-        interactive={false}
-        ref={shadowRef}
-        texture={shadowTexture}
-        x={centerX}
-        y={centerY}
-      /> */}
       {props.state !== "unlocked" && (
         <pixiSprite
           anchor={0.5}
