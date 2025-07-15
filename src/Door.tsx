@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Assets, Sprite, Texture } from "pixi.js";
 import { useResponsiveSprite } from "./hooks";
+import { UIConfig } from "./uiConfig";
 
 type DoorProps = {
   state: string;
@@ -21,11 +22,15 @@ export const Door = (props: DoorProps) => {
 
   useResponsiveSprite(
     "fixed",
-    props.state === "unlocked" ? 0.225 : 0.35,
+    props.state === "unlocked"
+      ? UIConfig.door.scale.unlocked
+      : UIConfig.door.scale.locked,
     doorRef,
     doorTexture,
-    props.state === "unlocked" ? 280 : 10,
-    -10
+    props.state === "unlocked"
+      ? UIConfig.door.offsetX.unlocked
+      : UIConfig.door.offsetX.locked,
+    UIConfig.door.offsetY
   );
 
   return (

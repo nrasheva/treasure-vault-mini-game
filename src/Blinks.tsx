@@ -1,4 +1,5 @@
 import { Blink } from "./Blink";
+import { UIConfig } from "./uiConfig";
 
 type BlinksProps = {
   state: string;
@@ -7,9 +8,15 @@ type BlinksProps = {
 export const Blinks = ({ state }: BlinksProps) => {
   return (
     <>
-      <Blink state={state} x={-90} y={20} scale={0.03} />
-      <Blink state={state} x={-50} y={10} scale={0.1} />
-      <Blink state={state} x={70} y={60} scale={0.04} />
+      {UIConfig.blinks.map((b, index) => (
+        <Blink
+          key={index}
+          state={state}
+          x={b.x}
+          y={b.y}
+          scale={b.scale}
+        />
+      ))}
     </>
   );
 };
