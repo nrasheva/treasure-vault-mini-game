@@ -6,3 +6,6 @@ export const generateSecret = (): Pair[] => {
     direction: Math.random() < 0.5 ? "clockwise" : "counterclockwise",
   }));
 };
+
+export const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));

@@ -5,7 +5,7 @@ import { Background } from "./Background";
 import { Door } from "./Door";
 import { Handle } from "./Handle";
 import { Timer } from "./Timer";
-import { generateSecret } from "./utils";
+import { generateSecret, wait } from "./utils";
 
 import type { Direction, Pair } from "./types";
 import { Blinks } from "./Blinks";
@@ -61,13 +61,13 @@ export default function App() {
         if (input[i] !== sequence[i]) {
           setState("mistake");
 
-          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await wait(3000);
           startGame();
         } else if (input.length === sequence.length) {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
+          await wait(1500);
           setState("unlocked");
 
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await wait(5000);
           startGame();
         }
       }
