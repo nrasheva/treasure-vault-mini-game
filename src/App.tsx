@@ -4,7 +4,6 @@ import { Application, extend } from "@pixi/react";
 import { Background } from "./Background";
 import { Door } from "./Door";
 import { Handle } from "./Handle";
-import { Timer } from "./Timer";
 import { generateSecret, wait } from "./utils";
 
 import type { Direction, Pair } from "./types";
@@ -46,10 +45,6 @@ export default function App() {
 
     loadAssets();
   }, []);
-
-  // useEffect(() => {
-  //   startGame();
-  // }, []);
 
   useEffect(() => {
     if (!loaded) return;
@@ -100,10 +95,10 @@ export default function App() {
       ) : (
         <>
           <Background />
-          <Blinks state={state} />
+          {state === "unlocked" && <Blinks state={state} />}
           <Door state={state} />
           <Handle key={state} onChange={handleInput} state={state} />
-          <Timer state={state} />
+          {/* <Timer state={state} /> */}
         </>
       )}
     </Application>
