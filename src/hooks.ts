@@ -1,10 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Sprite, Text, Texture } from "pixi.js";
-import { useApplication } from "@pixi/react";
+import { useApplication, useTick } from "@pixi/react";
 
 export const useResponsiveSprite = (
   mode: "fixed" | "cover",
-  multiplier: number, 
+  multiplier: number,
   sprite: React.RefObject<Sprite | null>,
   texture: Texture,
   x: number,
@@ -44,28 +44,25 @@ export const useResponsiveSprite = (
 };
 
 export const useResponsiveText = (
-  text: React.RefObject<Text | null>,
-  x: number,
-  y: number,
+  textRef: React.RefObject<Text | null>,
+  offsetX: number,
+  offsetY: number
 ) => {
   const { app } = useApplication();
+  const prevSize = useRef({ width: 0, height: 0 });
 
-  useEffect(() => {
-    const updateTransform = () => {
-      if (text.current) {
-        text.current.position.set(
-          app.screen.width / 2 + x,
-          app.screen.height / 2 + y
-        );
+  useTick(() => {
+    const { width, height } = app.screen;
+
+    if (
+      width !== prevSize.current.width ||
+      height !== prevSize.current.height
+    ) {
+      if (textRef.current) {
+        textRef.current.position.set(width / 2 + offsetX, height / 2 + offsetY);
       }
-    };
 
-    updateTransform();
-
-    app.renderer.on("resize", updateTransform);
-
-    return () => {
-      app.renderer.off("resize", updateTransform);
-    };
-  }, [app, text, x, y]);
+      prevSize.current = { width, height };
+    }
+  });
 };
